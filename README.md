@@ -1,6 +1,8 @@
 # primer_blast_local
 A program for screening primers against a local database of genomes/sequences.
 
+Produces a CSV with suffix `__results.pass.csv` with primer-template combinations which pass thresholds. Will also output a logfile to the working directory.
+
 ```
 usage: primer_blast_local.py [-h] [-g GENOMES] [-p PRIMERS] [-o OUT] [-m TM_THRESH] [-t N_THREADS] [--min_size MIN_SIZE] [--max_size MAX_SIZE] [--na NA] [-k POT] [--tris TRIS] [--mg MG] [--dntps DNTPS] [--saltcorr SALTCORR] [--no_blast] [--use_existing_db]
 
