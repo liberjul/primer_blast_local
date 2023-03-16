@@ -9,7 +9,7 @@ parser.add_argument("-g", "--genomes", type=str, help="FASTA formatted file cont
 parser.add_argument("-p", "--primers", type=str, help="A FASTA containing primer sequences OR an excel file output by IDT PrimerQuest. If a FASTA, records should be formatted without spaces like >Assay_Name(unique)|Target_Name|Direction(fwd|rev)")
 parser.add_argument("-o", "--out", type=str, help="Path and prefix of outputs.")
 parser.add_argument("-m", "--tm_thresh", type=float, default=45., help="Minimum melting temperature at which primers should be included.")
-parser.add_argument("-t", "--n_threads", type=int, default=1, help="Nuber of threads to use for BLASTN.")
+parser.add_argument("-t", "--n_threads", type=int, default=1, help="Number of threads to use for BLASTN.")
 parser.add_argument("--min_size", type=int, default=20, help="Minimum amplicon size to include in results.")
 parser.add_argument("--max_size", type=int, default=9999, help="Maximum amplicon size to include in results.")
 parser.add_argument("--na", type=float, default=50., help="Sodium concentration, in millimolar.")

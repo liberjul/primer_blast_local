@@ -99,6 +99,6 @@ def _evaluate_hit_loc(hit_dict, primer_dict, tm_thresh = 45., size_max=9999, siz
                 fwd_seq, rev_seq = primer_dict[F"{assay_num_target}|fwd"], primer_dict[F"{assay_num_target}|rev"] # get primer sequences
                 passing, tm_fwd, tm_rev, amp_size, threep_f_mm, threep_r_mm = _check_primer_quals(x, y, fwd_seq, rev_seq, tm_thresh=tm_thresh, size_max=size_max, size_min=size_min, Na=Na, K=K, Tris=Tris, Mg=Mg, dNTPs=dNTPs, saltcorr=saltcorr)
                 if passing:
-                    buffer_passing += F"{assay_num_target},{fwd_seq},{rev_seq},{x['sseqid']},{tm_fwd},{tm_rev},{amp_size},{threep_f_mm},{threep_r_mm}\n"
-                buffer_all += F"{assay_num_target},{fwd_seq},{rev_seq},{x['sseqid']},{tm_fwd},{tm_rev},{amp_size},{threep_f_mm},{threep_r_mm}\n"
+                    buffer_passing += F"{assay_num_target},{fwd_seq},{rev_seq},{x['sseqid']},{tm_fwd},{tm_rev},{amp_size}\n"
+                buffer_all += F"{assay_num_target},{fwd_seq},{rev_seq},{x['sseqid']},{tm_fwd},{tm_rev},{amp_size}\n"
     return buffer_passing, buffer_all
