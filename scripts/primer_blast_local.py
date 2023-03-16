@@ -43,7 +43,7 @@ else:
         raise ValueError("Please reformat the primer file as specified in the help.")
 
 
-if not os.path.isdir(os.path.dirname(args.out)):
+if not os.path.isdir(os.path.dirname(args.out)) and os.path.dirname(args.out) != "":
     os.mkdir(os.path.dirname(args.out))
 
 # call commands
