@@ -19,6 +19,7 @@ parser.add_argument("--mg", type=float, default=0., help="Magnesium concentratio
 parser.add_argument("--dntps", type=float, default=0, help="dNTP concentration, in millimolar.")
 parser.add_argument("--saltcorr", type=int, default=5, help="Salt correction method. See https://biopython.org/docs/1.75/api/Bio.SeqUtils.MeltingTemp.html#Bio.SeqUtils.MeltingTemp.salt_correction")
 parser.add_argument("--no_blast", action="store_true", help="If specified, don't rerun blast but just change parameters for matches.")
+parser.add_argument("--use_existing_db", action="store_true", help="If specified, don't rebuild the database.")
 args = parser.parse_args()
 
 log_file = F"primer_blast_local_{time.strftime('%Y-%m-%d_%H-%M-%S')}.stderr.log"
@@ -48,7 +49,8 @@ if not os.path.isdir(os.path.dirname(args.out)):
 # call commands
 blast_out = args.out + "__blastn.out"
 if not args.no_blast:
-    blast_db = _call_makeblastdb(args.genomes, log_file)
+    if not args.use_existing_db:
+        blast_db = _call_makeblastdb(args.genomes, log_file)
     _call_blastn(primer_fasta, blast_db, args.n_threads, log_file, blast_out)
 blast_d = _blast_to_dict(blast_out)
 buffer_passing, buffer_all = _evaluate_hit_loc(blast_d, primer_dict, tm_thresh = args.tm_thresh, size_max=args.max_size, size_min=args.min_size, Na=args.na, K=args.pot, Tris=args.tris, Mg=args.mg, dNTPs=args.dntps, saltcorr=args.saltcorr)

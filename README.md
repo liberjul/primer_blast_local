@@ -2,7 +2,7 @@
 A program for screening primers against a local database of genomes/sequences.
 
 ```
-usage: primer_blast_local.py [-h] [-g GENOMES] [-p PRIMERS] [-o OUT] [-m TM_THRESH] [-t N_THREADS] [--min_size MIN_SIZE] [--max_size MAX_SIZE] [--na NA] [-k POT] [--tris TRIS] [--mg MG] [--dntps DNTPS] [--saltcorr SALTCORR] [--no_blast]
+usage: primer_blast_local.py [-h] [-g GENOMES] [-p PRIMERS] [-o OUT] [-m TM_THRESH] [-t N_THREADS] [--min_size MIN_SIZE] [--max_size MAX_SIZE] [--na NA] [-k POT] [--tris TRIS] [--mg MG] [--dntps DNTPS] [--saltcorr SALTCORR] [--no_blast] [--use_existing_db]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -25,4 +25,5 @@ optional arguments:
   --dntps DNTPS         dNTP concentration, in millimolar.
   --saltcorr SALTCORR   Salt correction method. See https://biopython.org/docs/1.75/api/Bio.SeqUtils.MeltingTemp.html#Bio.SeqUtils.MeltingTemp.salt_correction
   --no_blast            If specified, don't rerun blast but just change parameters for matches.
+  --use_existing_db     If specified, don't rebuild the database
   ```
