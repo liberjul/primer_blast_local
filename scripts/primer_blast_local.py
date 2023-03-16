@@ -14,7 +14,7 @@ parser.add_argument("--min_size", type=int, default=20, help="Minimum amplicon s
 parser.add_argument("--max_size", type=int, default=9999, help="Maximum amplicon size to include in results.")
 parser.add_argument("--na", type=float, default=50., help="Sodium concentration, in millimolar.")
 parser.add_argument("-k", "--pot", type=float, default=0., help="Potassium concentration, in millimolar.")
-parser.add_argument("--tris", type=float, default=3., help="Tris concentration, in millimolar.")
+parser.add_argument("--tris", type=float, default=0., help="Tris concentration, in millimolar.")
 parser.add_argument("--mg", type=float, default=0., help="Magnesium concentration, in millimolar.")
 parser.add_argument("--dntps", type=float, default=0, help="dNTP concentration, in millimolar.")
 parser.add_argument("--saltcorr", type=int, default=5, help="Salt correction method. See https://biopython.org/docs/1.75/api/Bio.SeqUtils.MeltingTemp.html#Bio.SeqUtils.MeltingTemp.salt_correction")

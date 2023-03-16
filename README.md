@@ -7,23 +7,22 @@ usage: primer_blast_local.py [-h] [-g GENOMES] [-p PRIMERS] [-o OUT] [-m TM_THRE
 optional arguments:
   -h, --help            show this help message and exit
   -g GENOMES, --genomes GENOMES
-                        FASTA formatted file containing concatenated genome records. It may be helpful to include the genome name in each record header.
+                        (str) FASTA formatted file containing concatenated genome records. It may be helpful to include the genome name in each record header.
   -p PRIMERS, --primers PRIMERS
-                        A FASTA containing primer sequences OR an excel file output by IDT PrimerQuest. If a FASTA, records should be formatted without spaces like
-                        >Assay_Name(unique)|Target_Name|Direction(fwd|rev)
-  -o OUT, --out OUT     Path and prefix of outputs.
+                        (str) A FASTA containing primer sequences OR an excel file output by IDT PrimerQuest. If a FASTA, records should be formatted without spaces like >Assay_Name(unique)|Target_Name|Direction(fwd|rev)
+  -o OUT, --out OUT     (str) Path and prefix of outputs.
   -m TM_THRESH, --tm_thresh TM_THRESH
-                        Minimum melting temperature at which primers should be included.
+                        (float) Minimum melting temperature at which primers should be included. Default 45.0.
   -t N_THREADS, --n_threads N_THREADS
-                        Nuber of threads to use for BLASTN.
-  --min_size MIN_SIZE   Minimum amplicon size to include in results.
-  --max_size MAX_SIZE   Maximum amplicon size to include in results.
-  --na NA               Sodium concentration, in millimolar.
-  -k POT, --pot POT     Potassium concentration, in millimolar.
-  --tris TRIS           Tris concentration, in millimolar.
-  --mg MG               Magnesium concentration, in millimolar.
-  --dntps DNTPS         dNTP concentration, in millimolar.
-  --saltcorr SALTCORR   Salt correction method. See https://biopython.org/docs/1.75/api/Bio.SeqUtils.MeltingTemp.html#Bio.SeqUtils.MeltingTemp.salt_correction
+                        (int) Number of threads to use for BLASTN. Default 1.
+  --min_size MIN_SIZE   (int) Minimum amplicon size to include in results. Default 20.
+  --max_size MAX_SIZE   (int) Maximum amplicon size to include in results. Default 9999.
+  --na NA               (float) Sodium concentration, in millimolar. Default 50.0.
+  -k POT, --pot POT     (float) Potassium concentration, in millimolar. Default 0.0.
+  --tris TRIS           (float) Tris concentration, in millimolar. Default 0.0.
+  --mg MG               (float) Magnesium concentration, in millimolar. Default 0.0.
+  --dntps DNTPS         (float) dNTP concentration, in millimolar. Default 0.0.
+  --saltcorr SALTCORR   (int) Salt correction method. See https://biopython.org/docs/1.75/api/Bio.SeqUtils.MeltingTemp.html#Bio.SeqUtils.MeltingTemp.salt_correction Default 5.
   --no_blast            If specified, don't rerun blast but just change parameters for matches.
   --use_existing_db     If specified, don't rebuild the database
   ```
