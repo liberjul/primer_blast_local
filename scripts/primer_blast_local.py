@@ -65,7 +65,7 @@ print("Parsing results...")
 blast_d = _blast_to_dict(blast_out)
 buffer_passing, buffer_all = _evaluate_hit_loc(blast_d, primer_dict, tm_thresh = args.tm_thresh, size_max=args.max_size, size_min=args.min_size, Na=args.na, K=args.pot, Tris=args.tris, Mg=args.mg, dNTPs=args.dntps, saltcorr=args.saltcorr)
 if args.amp_seq:
-    buffer_passing = _pull_amp_seqs(buffer_passing, args.genomes)
+    buffer_passing = _pull_amp_seqs(buffer_passing, args.genomes, log_file, Na=args.na, K=args.pot, Tris=args.tris, Mg=args.mg, dNTPs=args.dntps, saltcorr=args.saltcorr)
 with open(args.out + "__results.pass.csv", "w") as ofile:
     ofile.write(buffer_passing)
 with open(args.out + "__results.all.csv", "w") as ofile:

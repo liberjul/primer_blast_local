@@ -27,7 +27,7 @@ def _find_3prime_mms(pseq, aseq): # find 3' end mismatches between primer and al
 
 def _check_primer_quals(hit1, hit2, fwd_seq, rev_seq, tm_thresh = 45., size_max=9999, size_min=20, Na=50, K=0, Tris=0, Mg=0, dNTPs=0, saltcorr=5):
     if hit1["sseqid"] == hit2["sseqid"] and hit1["sstrand"] != hit2["sstrand"]: # Check opposite strand annealing
-        end_diff = int(hit2["send"]) - int(hit1["send"]) # amplicon size
+        end_diff = int(hit2["sstart"]) - int(hit1["sstart"]) # amplicon size
         if (hit1["sstrand"] == "plus" and end_diff > 0) or (hit1["sstrand"] == "minus" and end_diff < 0): # primers are convergent
             try:
                 if hit1["qseq"] == hit1["sseq"]:
@@ -46,9 +46,9 @@ def _check_primer_quals(hit1, hit2, fwd_seq, rev_seq, tm_thresh = 45., size_max=
             threeprime_end_mm_fwd = _find_3prime_mms(fwd_seq, hit1["sseq"]) # find 3' end mismatch for the forward primer
             threeprime_end_mm_rev = _find_3prime_mms(rev_seq, hit2["sseq"]) # find 3' end mismatch for the reverse primer
             if tm_fwd >= tm_thresh and tm_rev >= tm_thresh and size_min <= abs(end_diff) <= size_max and threeprime_end_mm_fwd == 0 and threeprime_end_mm_rev == 0:
-                return True, tm_fwd, tm_rev, abs(end_diff), threeprime_end_mm_fwd, threeprime_end_mm_rev, int(hit1["send"]), int(hit2["send"])
+                return True, tm_fwd, tm_rev, abs(end_diff), threeprime_end_mm_fwd, threeprime_end_mm_rev, int(hit1["sstart"]), int(hit2["sstart"])
             else:
-                return False, tm_fwd, tm_rev, abs(end_diff), threeprime_end_mm_fwd, threeprime_end_mm_rev, int(hit1["send"]), int(hit2["send"])
+                return False, tm_fwd, tm_rev, abs(end_diff), threeprime_end_mm_fwd, threeprime_end_mm_rev, int(hit1["sstart"]), int(hit2["sstart"])
         else:
             return False, 0., 0. , 0, 0, 0, 0, 0
     else:
@@ -92,7 +92,7 @@ def _blast_to_dict(file):
     return hit_dict
 
 def _evaluate_hit_loc(hit_dict, primer_dict, tm_thresh = 45., size_max=9999, size_min=20, Na=50, K=0, Tris=0, Mg=0, dNTPs=0, saltcorr=5):
-    buffer_passing, buffer_all = "Assay_name_and_target,Forward_primer_seq,Reverse_primer_seq,Subject_ID,Tm_forward,Tm_reverse,amplicon_size\n", "Assay_name_and_target,Forward_primer_seq,Reverse_primer_seq,Tm_forward,Tm_reverse,amplicon_size\n"
+    buffer_passing, buffer_all = "Assay_name_and_target,Forward_primer_seq,Reverse_primer_seq,Subject_ID,Tm_forward,Tm_reverse,Amplicon_size,Start,End\n", "Assay_name_and_target,Forward_primer_seq,Reverse_primer_seq,Tm_forward,Tm_reverse,amplicon_size\n"
     for assay_num_target in hit_dict:
         for x in hit_dict[assay_num_target]["fwd"]:
             for y in hit_dict[assay_num_target]["rev"]:
@@ -103,12 +103,20 @@ def _evaluate_hit_loc(hit_dict, primer_dict, tm_thresh = 45., size_max=9999, siz
                 buffer_all += F"{assay_num_target},{fwd_seq},{rev_seq},{x['sseqid']},{tm_fwd},{tm_rev},{amp_size}\n"
     return buffer_passing, buffer_all
 
-def _pull_amp_seqs(buffer_passing, fasta):
+def _pull_amp_seqs(buffer_passing, fasta, log_file, Na=50, K=0, Tris=0, Mg=0, dNTPs=0, saltcorr=5):
     lines = buffer_passing.split("\n")[1:-1]
     seq_ids = [x.split(",")[3] for x in lines]
     unique_ids = set(seq_ids)
+    # Below commented code may be faster, but is more storage-intensive
+    # with open(log_file, "a") as log:
+    #     subprocess.run("> contig_hits.temp", check=True, shell=True, stderr=log)
+    #     for contig in unique_ids:
+    #         commands = ['awk "/>${', contig, '}/{f=1; c=0} f; />/ && ++c==2{f=0}" ',  fasta, ' >> contig_hits.temp']
+    #         print("".join(commands))
+    #         subprocess.run("".join(commands), check=True, shell=True, stderr=log)
     seq_dict = {}
     count_found = 0
+    # with open("contig_hits.temp", "r") as ifile:
     with open(fasta, "r") as ifile:
         line = ifile.readline()
         while line != "":
@@ -119,13 +127,14 @@ def _pull_amp_seqs(buffer_passing, fasta):
                 seq_dict[header] = ""
                 line = ifile.readline()
                 while line != "" and line[0] != ">":
-                    seq_dict[header] += line.strip()
+                    seq_dict[header] = F"{seq_dict[header]}{line[:-1]}"
                     line = ifile.readline()
                 if count_found == len(unique_ids):
                     break
             else:
                 line = ifile.readline()
-    buffer = "Assay_name_and_target,Forward_primer_seq,Reverse_primer_seq,Subject_ID,Tm_forward,Tm_reverse,Amplicon_size,Amplicon_sequence\n"
+
+    buffer = "Assay_name_and_target,Forward_primer_seq,Reverse_primer_seq,Subject_ID,Tm_forward,Tm_reverse,Amplicon_size,Start,End,Amplicon_sequence,Amplicon_tm\n"
     for i in lines:
         spl = i.split(",")
         seq_id, start, stop = spl[3], int(spl[7]), int(spl[8])
@@ -133,5 +142,11 @@ def _pull_amp_seqs(buffer_passing, fasta):
             seq = seq_dict[seq_id][start-1:stop]
         else:
             seq = seq_dict[seq_id][stop-1:start]
-        buffer += F"{i},{seq}\n"
+        try:
+            amp_tm = mt.Tm_NN(seq, nn_table = mt.DNA_NN4, Na=Na, K=K, Tris=Tris, Mg=Mg, dNTPs=dNTPs, saltcorr=saltcorr)
+        except ValueError:
+            amp_tm = 0.
+        if stop < start:
+            seq = Seq(seq).reverse_complement()
+        buffer += F"{i},{seq},{amp_tm}\n"
     return buffer
