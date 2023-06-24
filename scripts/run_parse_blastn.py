@@ -46,13 +46,13 @@ def _check_primer_quals(hit1, hit2, fwd_seq, rev_seq, tm_thresh = 45., size_max=
             threeprime_end_mm_fwd = _find_3prime_mms(fwd_seq, hit1["sseq"]) # find 3' end mismatch for the forward primer
             threeprime_end_mm_rev = _find_3prime_mms(rev_seq, hit2["sseq"]) # find 3' end mismatch for the reverse primer
             if tm_fwd >= tm_thresh and tm_rev >= tm_thresh and size_min <= abs(end_diff) <= size_max and threeprime_end_mm_fwd == 0 and threeprime_end_mm_rev == 0:
-                return True, tm_fwd, tm_rev, abs(end_diff), threeprime_end_mm_fwd, threeprime_end_mm_rev
+                return True, tm_fwd, tm_rev, abs(end_diff), threeprime_end_mm_fwd, threeprime_end_mm_rev, int(hit1["send"]), int(hit2["send"])
             else:
-                return False, tm_fwd, tm_rev, abs(end_diff), threeprime_end_mm_fwd, threeprime_end_mm_rev
+                return False, tm_fwd, tm_rev, abs(end_diff), threeprime_end_mm_fwd, threeprime_end_mm_rev, int(hit1["send"]), int(hit2["send"])
         else:
-            return False, 0., 0. , 0, 0, 0
+            return False, 0., 0. , 0, 0, 0, 0, 0
     else:
-        return False, 0., 0. , 0, 0, 0
+        return False, 0., 0. , 0, 0, 0, 0, 0
 
 def _call_makeblastdb(fasta, log_file):
     with open(log_file, "a") as log:
@@ -97,8 +97,41 @@ def _evaluate_hit_loc(hit_dict, primer_dict, tm_thresh = 45., size_max=9999, siz
         for x in hit_dict[assay_num_target]["fwd"]:
             for y in hit_dict[assay_num_target]["rev"]:
                 fwd_seq, rev_seq = primer_dict[F"{assay_num_target}|fwd"], primer_dict[F"{assay_num_target}|rev"] # get primer sequences
-                passing, tm_fwd, tm_rev, amp_size, threep_f_mm, threep_r_mm = _check_primer_quals(x, y, fwd_seq, rev_seq, tm_thresh=tm_thresh, size_max=size_max, size_min=size_min, Na=Na, K=K, Tris=Tris, Mg=Mg, dNTPs=dNTPs, saltcorr=saltcorr)
+                passing, tm_fwd, tm_rev, amp_size, threep_f_mm, threep_r_mm, start, end = _check_primer_quals(x, y, fwd_seq, rev_seq, tm_thresh=tm_thresh, size_max=size_max, size_min=size_min, Na=Na, K=K, Tris=Tris, Mg=Mg, dNTPs=dNTPs, saltcorr=saltcorr)
                 if passing:
-                    buffer_passing += F"{assay_num_target},{fwd_seq},{rev_seq},{x['sseqid']},{tm_fwd},{tm_rev},{amp_size}\n"
+                    buffer_passing += F"{assay_num_target},{fwd_seq},{rev_seq},{x['sseqid']},{tm_fwd},{tm_rev},{amp_size},{start},{end}\n"
                 buffer_all += F"{assay_num_target},{fwd_seq},{rev_seq},{x['sseqid']},{tm_fwd},{tm_rev},{amp_size}\n"
     return buffer_passing, buffer_all
+
+def _pull_amp_seqs(buffer_passing, fasta):
+    lines = buffer_passing.split("\n")[1:-1]
+    seq_ids = [x.split(",")[3] for x in lines]
+    unique_ids = set(seq_ids)
+    seq_dict = {}
+    count_found = 0
+    with open(fasta, "r") as ifile:
+        line = ifile.readline()
+        while line != "":
+            if line != "" and line[0] == ">" and line[1:].split(" ")[0] in unique_ids:
+                count_found += 1
+                print(F"Number of records found: {count_found}/{len(unique_ids)}")
+                header = line[1:].split(" ")[0]
+                seq_dict[header] = ""
+                line = ifile.readline()
+                while line != "" and line[0] != ">":
+                    seq_dict[header] += line.strip()
+                    line = ifile.readline()
+                if count_found == len(unique_ids):
+                    break
+            else:
+                line = ifile.readline()
+    buffer = "Assay_name_and_target,Forward_primer_seq,Reverse_primer_seq,Subject_ID,Tm_forward,Tm_reverse,Amplicon_size,Amplicon_sequence\n"
+    for i in lines:
+        spl = i.split(",")
+        seq_id, start, stop = spl[3], int(spl[7]), int(spl[8])
+        if start < stop:
+            seq = seq_dict[seq_id][start-1:stop]
+        else:
+            seq = seq_dict[seq_id][stop-1:start]
+        buffer += F"{i},{seq}\n"
+    return buffer
