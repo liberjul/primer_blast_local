@@ -60,9 +60,9 @@ def _call_makeblastdb(fasta, log_file):
         subprocess.run(F" makeblastdb -in {fasta} -dbtype nucl -out {db_basename}__BLAST", check=True, shell=True, stderr=log)
     return F"{db_basename}__BLAST"
 
-def _call_blastn(query, db, nt, log_file, out_file):
+def _call_blastn(query, db, nt, ev, log_file, out_file):
     with open(log_file, "a") as log:
-        subprocess.run(F"blastn -query {query} -db {db} -num_threads {nt} -word_size 7 -outfmt \"6 qseqid sseqid qstart qend sstart send evalue pident qcovs qseq sseq sstrand\" -max_target_seqs 30000 > {out_file}", check=True, shell=True, stderr=log)
+        subprocess.run(F"blastn -query {query} -db {db} -num_threads {nt} -word_size 7 -evalue {ev} -outfmt \"6 qseqid sseqid qstart qend sstart send evalue pident qcovs qseq sseq sstrand\" -max_target_seqs 30000 > {out_file}", check=True, shell=True, stderr=log)
         print(F"blastn -query {query} -db {db} -num_threads {nt} -outfmt \"6 qseqid sseqid qstart qend sstart send evalue pident qcovs qseq sseq sstrand\" -max_target_seqs 30000 > {out_file}")
 
 
