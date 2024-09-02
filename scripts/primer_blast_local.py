@@ -9,6 +9,7 @@ parser.add_argument("-g", "--genomes", type=str, help="FASTA formatted file cont
 parser.add_argument("-p", "--primers", type=str, help="A FASTA containing primer sequences OR an excel file output by IDT PrimerQuest. If a FASTA, records should be formatted without spaces like >Assay_Name(unique)|Target_Name|Direction(fwd|rev)")
 parser.add_argument("-o", "--out", type=str, help="Path and prefix of outputs.")
 parser.add_argument("-m", "--tm_thresh", type=float, default=45., help="Minimum melting temperature at which primers should be included. (default:45.)")
+parser.add_argument("-e", "--evalue", type=float, default=10., help="Maximum e-value of BLAST hits to evaluate. (default:10)")
 parser.add_argument("-t", "--n_threads", type=int, default=1, help="Number of threads to use for BLASTN. (default:1)")
 parser.add_argument("--min_size", type=int, default=20, help="Minimum amplicon size to include in results. (default:20)")
 parser.add_argument("--max_size", type=int, default=9999, help="Maximum amplicon size to include in results. (default:9999)")
@@ -59,7 +60,7 @@ if not args.no_blast:
         blast_db = _call_makeblastdb(args.genomes, log_file)
     else:
         blast_db = os.path.splitext(args.genomes)[0] + "__BLAST"
-    _call_blastn(primer_fasta, blast_db, args.n_threads, log_file, blast_out)
+    _call_blastn(primer_fasta, blast_db, args.n_threads, args.evalue, log_file, blast_out)
 print("BLASTn finished...")
 print("Parsing results...")
 blast_d = _blast_to_dict(blast_out)
