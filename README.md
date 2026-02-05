@@ -1,6 +1,9 @@
 # primer_blast_local
 A program for screening primers against a local database of genomes/sequences.
 
+NCBI-BLAST must be installed locally. It can be downloaded from [NCBI](https://blast.ncbi.nlm.nih.gov/doc/blast-help/downloadblastdata.html) or with [conda](https://anaconda.org/channels/bioconda/packages/blast/overview).
+Other dependencies include [Biopython](https://biopython.org/wiki/Download), pandas, and numpy.
+
 Produces a CSV with suffix `__results.pass.csv` with primer-template combinations which pass thresholds. Will also output a logfile to the working directory.
 
 ```
